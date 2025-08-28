@@ -1,14 +1,26 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# from .serializers.common import AuthSerializer
+from .serializers.common import AuthSerializer
 from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# * Path: /users/sign-up
+# Sign-up
 
 class SignUpView(APIView):
 
     def post(self, request):
-        return Response("Hit sign-up view")
+        serialized_user = AuthSerializer(data=request.data)
+        serialized_user.is_valid(raise_exception=True)
+        serialized_user.save()
+        print(serialized_user.data)
+
+        refresh = RefreshToken.for_user(serialized_user.instance)
+        print('ACCESS TOKEN:', refresh.access_token)
+
+        return Response({
+            'refresh_token': str(refresh),
+             'access_token': str(refresh.access_token)
+            }, 201)
 
 
