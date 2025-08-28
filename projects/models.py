@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 class Project(models.Model):
+    
     STATUS_CHOICES = [
         ('in_progress', 'In Progress'),
         ('review', 'Under Review'),
