@@ -1,3 +1,13 @@
-from django.shortcuts import render
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from .models import Project
+from .serializers.common import ProjectSerializer
 
-# Create your views here.
+class ProjectListView(ListCreateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    # permission_classes = [IsAuthenticatedOrReadOnly]
+
+class ProjectDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    # permission_classes = [IsAuthenticatedOrReadOnly]

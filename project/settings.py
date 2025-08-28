@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'teams',
     'rest_framework',
     'rest_framework_simplejwt',
+    'projects',
 ]
 
 MIDDLEWARE = [
