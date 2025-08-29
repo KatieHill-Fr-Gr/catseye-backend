@@ -22,7 +22,20 @@ class SourceListView(APIView):
     def post(self, request):
         serialized_source_texts = SourceSerializer(data=request.data)
         serialized_source_texts.is_valid(raise_exception=True)
-        serialized_source_texts.save()
+
+        source_file = serialized_source_texts.validated_data.get('source_file')
+        file_data = None
+        if source_file:
+            file_data = source_file.read().decode('utf-8')
+        
+        if serialized_source_texts.validated_data.get('source_file'):
+            serialized_source_texts.validated_data.pop('source_file')
+
+        if file_data:
+            serialized_source_texts.save(body=file_data)
+        else: 
+            serialized_source_texts.save()
+        
         return Response(serialized_source_texts.data, 201)
     
 
