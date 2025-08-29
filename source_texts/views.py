@@ -22,7 +22,7 @@ class SourceListView(APIView):
     def post(self, request):
         serialized_source_texts = SourceSerializer(data=request.data)
         serialized_source_texts.is_valid(raise_exception=True)
-        serialized_source_texts.save(owner=request.user)
+        serialized_source_texts.save()
         return Response(serialized_source_texts.data, 201)
     
 
@@ -41,14 +41,14 @@ class SourceDetailView(APIView):
         
     # Show route
     def get(self, request, pk):
-        source_text = self.get_source_text(pk)
+        source_text = self.get_source(pk)
         serialized_source_text = SourceSerializer(source_text)
         return Response(serialized_source_text.data)
         
     
     # Update route
     def put(self, request, pk):
-        source_text = self.get_source_text(pk)
+        source_text = self.get_source(pk)
         serialized_source_text = SourceSerializer(source_text, data=request.data, partial=True)
         serialized_source_text.is_valid(raise_exception=True)
         serialized_source_text.save()
@@ -56,7 +56,7 @@ class SourceDetailView(APIView):
     
     # Delete route
     def delete(self, request, pk):
-        source_text = self.get_source_text(pk)    
+        source_text = self.get_source(pk)    
         source_text.delete()
         return Response(status=204)
 
