@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'projects',
     'tasks',
     'source_texts',
+    'translations',
 ]
 
 MIDDLEWARE = [

@@ -4,11 +4,19 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Source(models.Model):
-    # parent_task = models.ForeignKey(to='tasks.Task', on_delete=models.SET_NULL, null=True, blank=True, related_name='task_source_texts')
+
+    LANG_CHOICES = [
+        ('en-gb', 'English (UK)'),
+        ('en-us', 'English (US)'),
+        ('fr-fr', 'French'),
+        ('es-es', 'Spanish'),
+        ('it-it', 'Italian'),
+        ('de-de', 'German'),
+    ]
 
     title = models.CharField(max_length=255)
     body = models.TextField(blank=True)
-    source_language = models.CharField(max_length=50)
+    source_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='en-gb')
     feedback = ArrayField(models.JSONField(default=dict), default=list, blank=True)
 
   
