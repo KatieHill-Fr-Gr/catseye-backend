@@ -11,7 +11,7 @@ class TaskListView(ListCreateAPIView):
     def get_queryset(self):
         return Task.objects.filter(parent_project_id=self.kwargs['pk'])
     
-    def perform_create(self, serializer): 
+    def create(self, serializer): 
         serializer.save(parent_project_id=self.kwargs['pk'])
 
     # permission_classes = [IsAuthenticatedOrReadOnly]
@@ -19,6 +19,7 @@ class TaskListView(ListCreateAPIView):
 
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
+
     lookup_field = 'pk'
     lookup_url_kwarg = 'task_pk'
 
