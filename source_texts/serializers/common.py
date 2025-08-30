@@ -12,11 +12,5 @@ class SourceSerializer(ModelSerializer):
         if not data.get('body') and not data.get('source_file'):
             raise ValidationError({'body': 'Please provide a text' })
         return data
-     
-     # on front end, [0] for error message 
-     
-    #  def create(self, validated_data):
-    #       if validated_data.get('source_file'):
-    #            validated_data.pop('source_file')
-    #       return Source.objects.create(**validated_data)
+
      

@@ -2,23 +2,30 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from .models import Task
 from projects.models import Project 
 from .serializers.common import TaskSerializer
+from .serializers.populated import PopulatedTaskSerializer
+
+
 from django.shortcuts import get_object_or_404
 
 
 class TaskListView(ListCreateAPIView):
-    serializer_class = TaskSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedTaskSerializer
+        return TaskSerializer 
 
     def get_queryset(self):
         return Task.objects.filter(parent_project_id=self.kwargs['pk'])
     
-    def create(self, serializer): 
+    def perform_create(self, serializer): 
         serializer.save(parent_project_id=self.kwargs['pk'])
-
-    # permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
-    serializer_class = TaskSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedTaskSerializer
+        return TaskSerializer 
 
     lookup_field = 'pk'
     lookup_url_kwarg = 'task_pk'
@@ -28,4 +35,3 @@ class TaskDetailView(RetrieveUpdateDestroyAPIView):
         get_object_or_404(Project, pk=project_pk) 
         return Task.objects.filter(parent_project_id=project_pk)
     
-    # permission_classes = [IsAuthenticatedOrReadOnly]

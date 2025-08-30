@@ -1,13 +1,20 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Project
 from .serializers.common import ProjectSerializer
+from .serializers.populated import PopulatedProjectSerializer
 
 class ProjectListView(ListCreateAPIView):
     queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer
+        return ProjectSerializer 
 
 class ProjectDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.all()
-    serializer_class = ProjectSerializer
-    # permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer 
+        return ProjectSerializer
