@@ -1,7 +1,7 @@
-from rest_framework.serializers import ModelSerializer, FileField, ValidationError
+from rest_framework.serializers import ModelSerializer, ValidationError
 from ..models import Termbase, Term
 
-class TermSerializer(serializers.ModelSerializer):
+class TermSerializer(ModelSerializer):
     class Meta:
         model = Term
         fields = ['id', 'source_term', 'target_term', 'notes']

@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Termbase
 from .serializers.common import TermbaseSerializer
+from .serializers.common import TermSerializer
 from .serializers.populated import PopulatedTermbaseSerializer
 from rest_framework.exceptions import NotFound, PermissionDenied
 
@@ -56,3 +57,18 @@ class TermbaseDetailView(APIView):
        termbase = self.get_termbase(pk)  
        termbase.delete()
        return Response(status=204)
+    
+
+# * Path /termbases/<int:pk>/terms/
+
+class TermListView(APIView):
+    def post(self, request, termbase_pk): 
+        try:
+            termbase = Termbase.objects.get(pk=termbase_pk)
+        except Termbase.DoesNotExist:
+            raise NotFound('Termbase does not exist.')
+            
+        serializer = TermSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(termbase=termbase)
+        return Response(serializer.data, status=201)
