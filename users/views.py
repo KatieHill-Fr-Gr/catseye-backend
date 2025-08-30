@@ -2,12 +2,14 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers.common import AuthSerializer
+from rest_framework.permissions import AllowAny
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Sign-up
 
 class SignUpView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serialized_user = AuthSerializer(data=request.data)
