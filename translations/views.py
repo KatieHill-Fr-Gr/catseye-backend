@@ -36,7 +36,7 @@ class TranslationDetailView(APIView):
         
     # Show route
     def get(self, request, pk):
-        translation = self.get_source(pk)
+        translation = self.get_translation(pk)
         serialized_translation = TranslationSerializer(translation)
         return Response(serialized_translation.data)
         
