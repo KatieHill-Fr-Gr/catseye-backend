@@ -1,17 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Translation
-
 from .serializers.common import TranslationSerializer
-
 from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.permissions import IsAuthenticated
+
 
 # * Path: /translations
 
 class TranslationListView(APIView):
-    permission_classes = IsAuthenticated
-
     # Index route
     def get(self, request):
         translations = Translation.objects.all()
