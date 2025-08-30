@@ -19,7 +19,7 @@ class TermbaseListView(APIView):
     def post(self, request):
         serialized_termbases = TermbaseSerializer(data=request.data)
         serialized_termbases.is_valid(raise_exception=True)
-        serialized_termbases.save()
+        serialized_termbases.save(created_by=request.user)
         return Response(serialized_termbases.data, 201)
     
 
@@ -37,7 +37,7 @@ class TermbaseDetailView(APIView):
         
     # Show route
     def get(self, request, pk):
-        termbase = self.get_source(pk)
+        termbase = self.get_termbase(pk)
         serialized_termbase = PopulatedTermbaseSerializer(termbase)
         return Response(serialized_termbase.data)
         
@@ -49,10 +49,10 @@ class TermbaseDetailView(APIView):
         serialized_termbase = TermbaseSerializer(termbase, data=request.data, partial=True)
         serialized_termbase.is_valid(raise_exception=True)
         serialized_termbase.save()
-        return Response(serialized_termbase.validated_data)
+        return Response(serialized_termbase.data)
     
     # Delete route
     def delete(self, request, pk):
-       termbase = self.termbase(pk)  
+       termbase = self.get_termbase(pk)  
        termbase.delete()
        return Response(status=204)
