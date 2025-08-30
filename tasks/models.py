@@ -18,7 +18,6 @@ class Task(models.Model):
 
     parent_project = models.ForeignKey(to='projects.Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='project_tasks')
     assigned_to = models.ForeignKey(to='users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
-    # source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.SET_NULL, null=True, blank=True, related_name='associated_source_texts')
-    # source_translation = models.ForeignKey(to='translations.Translation', on_delete=models.SET_NULL, null=True, blank=True, related_name='associated_translations')
+    source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+    translation = models.ForeignKey(to='translations.Translation', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
 
-# Arrays for series of source texts or translations? Think this through
