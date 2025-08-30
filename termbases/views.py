@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Termbase
 from .serializers.common import TermbaseSerializer
+from .serializers.populated import PopulatedTermbaseSerializer
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 
@@ -11,7 +12,7 @@ class TermbaseListView(APIView):
     # Index route
     def get(self, request):
         termbases = Termbase.objects.all()
-        serialized_termbases = TermbaseSerializer(termbases, many=True)
+        serialized_termbases = PopulatedTermbaseSerializer(termbases, many=True)
         return Response(serialized_termbases.data)
 
     # Create route
@@ -37,7 +38,7 @@ class TermbaseDetailView(APIView):
     # Show route
     def get(self, request, pk):
         termbase = self.get_source(pk)
-        serialized_termbase = TermbaseSerializer(termbase)
+        serialized_termbase = PopulatedTermbaseSerializer(termbase)
         return Response(serialized_termbase.data)
         
     

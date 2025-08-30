@@ -14,6 +14,7 @@ class Termbase(models.Model):
         ('pl-PL', 'Polish'),
     ]
       
+      name = models.CharField(max_length=25)
       created_by = models.ForeignKey(to='users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_termbases')
       source_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='en-gb')
       target_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='fr-FR')
