@@ -5,12 +5,12 @@ from .models import Source
 from .serializers.common import SourceSerializer
 
 from rest_framework.exceptions import NotFound, PermissionDenied
-# ? from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
 
 # * Path: /source_texts
 
 class SourceListView(APIView):
-    # ? permission_classes = [IsAuthenticatedOrReadOnly]
+
 
     # Index route
     def get(self, request):
@@ -42,7 +42,6 @@ class SourceListView(APIView):
 # * Path: /source_texts/<int:pk>/
 
 class SourceDetailView(APIView):
-    # permission_classes = [IsAuthenticatedOrReadOnly]
 
     # object or 404
     def get_source(self, pk):

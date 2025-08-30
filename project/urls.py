@@ -24,4 +24,6 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('projects/', include('projects.urls')),
     path('source_texts/', include('source_texts.urls')),
+    path('translations/', include('translations.urls')),
+    path('termbases/', include('termbases.urls')),
 ]

@@ -25,8 +25,7 @@ class TranslationListView(APIView):
 # * Path: /translations/<int:pk>/
 
 class TranslationDetailView(APIView):
-    permission_classes = IsAuthenticated
-
+  
     # Object or 404
     def get_translation(self, pk):
         try:
@@ -46,9 +45,6 @@ class TranslationDetailView(APIView):
     def put(self, request, pk):
         translation = self.get_translation(pk)
 
-        # if project.team does not include request.user:
-        #     raise PermissionDenied() 
-
         serialized_translation = TranslationSerializer(translation, data=request.data, partial=True)
         serialized_translation.is_valid(raise_exception=True)
         serialized_translation.save()
@@ -56,10 +52,7 @@ class TranslationDetailView(APIView):
     
     # Delete route
     def delete(self, request, pk):
-        translation = self.translation(pk)  
-
-        # if project.team does not include request.user:
-        #     raise PermissionDenied() 
+        translation = self.get_translation(pk)  
 
         translation.delete()
         return Response(status=204)

@@ -20,6 +20,6 @@ class Translation(models.Model):
     body = models.TextField(blank=True)
     target_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='en-gb')
     source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.CASCADE, null=True, blank=True, related_name='translations')
-    # termbase = models.ForeignKey(to='termbases.Termbase', on_delete=models.SET_NULL, null=True, blank=True, related_name='translations')
+    termbase = models.ForeignKey(to='termbases.Termbase', on_delete=models.SET_NULL, null=True, blank=True, related_name='translations')
 
     feedback = ArrayField(models.JSONField(default=dict), default=list, blank=True)
