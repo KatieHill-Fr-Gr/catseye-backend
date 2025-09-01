@@ -24,4 +24,4 @@ class UserTeamProjectsView(ListCreateAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        return Project.objects.filter(team=user.team)
+        return Project.objects.filter(team_id=user.team.id)
