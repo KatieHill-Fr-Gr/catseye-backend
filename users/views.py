@@ -21,8 +21,7 @@ class SignUpView(APIView):
         print('ACCESS TOKEN:', refresh.access_token)
 
         return Response({
-            'refresh_token': str(refresh),
-             'access_token': str(refresh.access_token)
+             'access': str(refresh.access_token)
             }, 201)
 
 
