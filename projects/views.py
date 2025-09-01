@@ -18,3 +18,10 @@ class ProjectDetailView(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'GET':
             return PopulatedProjectSerializer 
         return ProjectSerializer
+
+class UserTeamProjectsView(ListCreateAPIView):
+    serializer_class = PopulatedProjectSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        return Project.objects.filter(team=user.team)
