@@ -4,7 +4,7 @@ from .serializers.common import ProjectSerializer
 from .serializers.populated import PopulatedProjectSerializer
 
 class ProjectListView(ListCreateAPIView):
-    queryset = Project.objects.all()
+    queryset = Project.objects.select_related('team', 'owner').all()
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -12,7 +12,7 @@ class ProjectListView(ListCreateAPIView):
         return ProjectSerializer 
 
 class ProjectDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Project.objects.all()
+    queryset = Project.objects.select_related('team', 'owner').all()
     
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -24,4 +24,4 @@ class UserTeamProjectsView(ListCreateAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        return Project.objects.filter(team_id=user.team.id)
+        return Project.objects.select_related('team', 'owner').filter(team_id=user.team.id) 
