@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from ..models import User
+import urllib.parse
 
 class AuthSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -17,9 +18,16 @@ class AuthSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirmation')
         print('Validated:', validated_data)
+
+        if not validated_data.get('profile_img'):
+            username = validated_data.get('username', 'User')
+            encoded_username = urllib.parse.quote(username)
+            validated_data['profile_img'] = f"https://ui-avatars.com/api/?name={encoded_username}&background=6366f1&color=ffffff&size=200"
+
+
         return User.objects.create_user(**validated_data)
 
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+
