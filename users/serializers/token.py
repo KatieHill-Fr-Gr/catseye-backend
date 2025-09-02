@@ -7,7 +7,9 @@ class TokenSerializer(TokenObtainPairSerializer):
 
         token['user'] = {
             'id': user.id,
-            'username': user.username
+            'username': user.username,
+            'profile_img': user.profile_img,
+            'job_title': user.job_title, 
         }
 
         return token
