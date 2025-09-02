@@ -30,4 +30,5 @@ class AuthSerializer(serializers.ModelSerializer):
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = '__all__'
 
