@@ -6,7 +6,7 @@ class SourceSerializer(ModelSerializer):
      
      class Meta:
             model = Source
-            fields = ['id', 'title', 'body', 'source_language', 'source_file', 'feedback', 'parent_task']
+            fields = ['id', 'title', 'body', 'source_language', 'source_file', 'feedback']
 
      def validate(self, data):
         if not data.get('body') and not data.get('source_file'):
