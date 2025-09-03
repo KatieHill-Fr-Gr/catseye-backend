@@ -17,7 +17,7 @@ class Source(models.Model):
     ]
 
     title = models.CharField(max_length=255)
-    body = models.TextField(blank=True)
+    body = models.JSONField(blank=True, null=True)
     source_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='en-gb')
     feedback = ArrayField(models.JSONField(default=dict), default=list, blank=True)
 

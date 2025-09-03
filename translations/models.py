@@ -17,7 +17,7 @@ class Translation(models.Model):
     ]
 
     title = models.CharField(max_length=255)
-    body = models.TextField(blank=True)
+    body = models.JSONField(blank=True, null=True)
     target_language = models.CharField(max_length=25, choices=LANG_CHOICES, default='en-gb')
     source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.CASCADE, null=True, blank=True, related_name='translations')
     termbase = models.ForeignKey(to='termbases.Termbase', on_delete=models.SET_NULL, null=True, blank=True, related_name='translations')
