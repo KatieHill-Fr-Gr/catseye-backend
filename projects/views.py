@@ -1,7 +1,9 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Project
+from tasks.models import Task
 from .serializers.common import ProjectSerializer
 from .serializers.populated import PopulatedProjectSerializer
+from tasks.serializers.populated import PopulatedTaskSerializer
 
 class ProjectListView(ListCreateAPIView):
     queryset = Project.objects.select_related('team', 'owner').all()
@@ -24,4 +26,12 @@ class UserTeamProjectsView(ListCreateAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        return Project.objects.select_related('team', 'owner').filter(team_id=user.team.id) 
+        return Project.objects.select_related('team', 'owner').filter(team_id=user.team.id)
+    
+class UserTasksView(ListCreateAPIView):
+    serializer_class = PopulatedTaskSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.select_related(
+            'parent_project', 'assigned_to', 'source_text', 'translation').filter(assigned_to=user)
