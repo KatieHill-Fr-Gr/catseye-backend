@@ -26,7 +26,36 @@ class SourceListView(APIView):
         source_file = serialized_source_texts.validated_data.get('source_file')
         file_data = None
         if source_file:
-            file_data = source_file.read().decode('utf-8')
+            try:
+                file_name = source_file.name.lower()
+            
+                if not file_name.endswith('.txt'):
+                    return Response(
+                        {'source_file': 'Only .txt files are supported. Please upload a plain text file.'}, 
+                        status=400
+                    )
+    
+                try:
+                    raw_data = source_file.read()
+                    file_data = raw_data.decode('utf-8')
+                
+                    if not file_data.strip():
+                        return Response(
+                            {'source_file': 'The uploaded file is empty. Please upload a file with text content.'}, 
+                            status=400
+                        )
+                    
+                except UnicodeDecodeError:
+                    return Response(
+                        {'source_file': 'Unable to read file. Please ensure it\'s saved as UTF-8 encoding.'}, 
+                        status=400
+                    )
+                
+            except Exception as e:
+                return Response(
+                    {'source_file': 'Error processing file. Please try again.'}, 
+                    status=400
+                )
         
         if serialized_source_texts.validated_data.get('source_file'):
             serialized_source_texts.validated_data.pop('source_file')
