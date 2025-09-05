@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers.common import AuthSerializer
 from .serializers.common import OwnerSerializer
+from .serializers.token import TokenSerializer
 from rest_framework.permissions import AllowAny
 from .models import User
 from rest_framework import status
@@ -20,8 +21,7 @@ class SignUpView(APIView):
         serialized_user.save()
         print(serialized_user.data)
 
-        refresh = RefreshToken.for_user(serialized_user.instance)
-        print('ACCESS TOKEN:', refresh.access_token)
+        refresh = TokenSerializer.get_token(serialized_user.instance)
 
         return Response({
              'access': str(refresh.access_token)
