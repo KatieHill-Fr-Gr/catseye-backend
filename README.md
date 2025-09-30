@@ -1,4 +1,4 @@
-# catseye - A CAT tool & project management app in one
+# Catseye - A CAT tool & project management app in one
 by Katie Hill 
 
 
