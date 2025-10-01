@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from teams.models import Team
 from ..models import User
 import urllib.parse
 
@@ -28,7 +29,17 @@ class AuthSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 class OwnerSerializer(serializers.ModelSerializer):
+    team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), required=False, allow_null=True)
+    team_info = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'job_title', 'profile_img', 'team']
+        fields = ['id', 'username', 'email', 'job_title', 'profile_img', 'team', 'team_info']
+
+    def get_team_info(self, obj):
+        if obj.team:
+            return {
+                'id': obj.team.id,
+                'name': obj.team.name
+            }
+        return None
 
