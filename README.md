@@ -110,7 +110,8 @@ The solution was to manually generate the token with `TokenSerializer.get_token(
 The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and name): 
 
 
-<img width="629" height="499" alt="Catseye_EditUserProfileFix" src="https://github.com/user-attachments/assets/2166fbf7-c442-46d6-801d-56ba758dbd79" />
+<img width="632" height="293" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/1ff7f7e6-6065-4dab-87e5-97275343cb55" />
+
 
 
 
