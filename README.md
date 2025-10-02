@@ -83,13 +83,59 @@ This project required multiple interconnected datasets so I started by planning 
 
 <img width="858" height="714" alt="Catseye_RoutingChart2" src="https://github.com/user-attachments/assets/3218b424-ab5a-411b-b270-d4f4bb7e10fb" />
 
-Finally, I created a Trello board to plan and manage my tasks throughout the week and keep all the reference materials in one place.
-
 
 ## Build
 
+#### 1) User Authentication 
+
+I implemented JWT authentication, manually extending the Access Token Lifetime in the project settings. I then created custom AuthSerializer and TokenSerializer classes to manage user authentication: 
 
 
+<img width="635" height="375" alt="Catseye_TokenSerializer" src="https://github.com/user-attachments/assets/42839312-e03c-41fc-a537-da7c2e7366ba" />
+
+
+Since the app is intended for business use, most of the routes require authentication. I applied Permission Classes to control access across the app, allowing unrestricted access to the homepage and signup routes only:
+
+<img width="630" height="202" alt="Catseye_RESTFrameworkAuth" src="https://github.com/user-attachments/assets/0fe359e5-ee1a-4742-b6c9-c069d0b08971" />
+
+
+#### 2) Data Models & Views
+
+I created separate Django apps for each data entity and defined the models, including their relationships using Foreign Keys and related names: 
+
+- users
+- teams
+- projects
+- tasks
+- source_texts
+- translations
+- termbases
+
+<img width="1042" height="476" alt="Catseye_TaskModel" src="https://github.com/user-attachments/assets/246d5da4-1eb5-4b77-a71b-a1e112a65abb" />
+
+
+For the API layer, I used Django REST Framework’s generic views wherever possible to speed up development and keep the codebase clean:
+
+
+<img width="1040" height="337" alt="Catseye_GenericViews" src="https://github.com/user-attachments/assets/1d84a795-faae-45d0-8fce-b7a6dc0e4642" />
+
+
+#### 3) Serializers
+
+Given the multiple relationships between models, it was important to manage how the data was exposed through the API to avoid multiple API calls on the frontend. I designed nested and populated serializers for the projects and tasks (associated with teams, users, source texts, and translations):  
+
+<img width="1043" height="192" alt="Catseye_NestedSerializers" src="https://github.com/user-attachments/assets/56b4b1a9-110f-4e0e-bd09-1a5b14541538" />
+
+
+
+#### 4) Nested Routes
+
+Instead of creating standalone endpoints for the tasks, I structured them under the project routes since the tasks can only belong to one project: 
+
+<img width="1044" height="226" alt="Catseye_NestedRoutes" src="https://github.com/user-attachments/assets/a3a1e97f-042a-4f5f-b99b-4b1b5ebbc2c1" />
+
+
+I decided to keep the sources texts, translations, and termbases separate so that these could be accessed by multiple projects and tasks. Overall, this approach helped to make it clear how resources are accessed and kept the API design clean and intuitive. 
 
 
 ## Challenges
@@ -97,10 +143,9 @@ Finally, I created a Trello board to plan and manage my tasks throughout the wee
 
 #### 1) Refresh Token 
 
-When generating a fresh token, the specific settings included in the serializer were ignored and a standard token was generated instead (without the user information). 
+When generating a new Token, the custom serializer settings were ignored and a standard token was generated without the user information in the payload.
 
-The solution was to manually generate the token with `TokenSerializer.get_token(serialized_user.instance)` to include the user in the payload:
-
+The solution was to manually generate the Token with `TokenSerializer.get_token(serialized_user.instance)`:
 
 <img width="629" height="305" alt="Catseye_RefreshTokenFix" src="https://github.com/user-attachments/assets/ed3769a7-88fd-4edc-9052-1bee9c877141" />
 
@@ -109,8 +154,9 @@ The solution was to manually generate the token with `TokenSerializer.get_token(
 
 The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and name): 
 
+<img width="1038" height="316" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/c2a682e4-5f75-4ba2-bda3-7d13f610244a" />
 
-<img width="632" height="293" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/1ff7f7e6-6065-4dab-87e5-97275343cb55" />
+
 
 
 
