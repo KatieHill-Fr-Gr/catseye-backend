@@ -1,6 +1,7 @@
 # Catseye - A CAT tool & project management app in one
 by Katie Hill 
 
+<img width="1440" height="806" alt="Catseye_LiveHomepage" src="https://github.com/user-attachments/assets/c947b071-46da-4cd8-8971-3c5547b9cf90" />
 
 *Screenshot of homepage*
 
@@ -152,12 +153,39 @@ The solution was to manually generate the Token with `TokenSerializer.get_token(
 
 #### 2) User Profile Update
 
-The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and name): 
+The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and the name): 
 
 <img width="1038" height="316" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/c2a682e4-5f75-4ba2-bda3-7d13f610244a" />
 
 
+#### 3) Task Statuses
+
+To update the task statuses via the drag-and-drop functionality of the Kanban board, I modified the `TaskDetailView` to support partial updates. This means that the status field is updated on the backend without the need to include the other required fields in the request. 
+
+Whenever a task is moved to a different column on the board (e.g. from “Review” to “Done”), its status is persisted in the database and remains consistent with the frontend state. 
+
+<img width="1042" height="354" alt="Catseye_TaskDetailView" src="https://github.com/user-attachments/assets/7bb5fd50-730a-49a3-854b-e080aa22db23" />
 
 
+## Wins
+
+
+
+## Key Learnings
+
+- Gained a solid understanding of Django ORM by modelling multiple related entities and managing database interactions efficiently.
+- Developed DRF serializers (including nested and custom serializers) to convert complex model instances into JSON responses.
+- Implemented nested API routes and a combination of generic and custom views to create a clean, scalable, and maintainable API.
+
+
+## Bugs
+
+There are currently no bugs and the API is working as expected. 
+
+
+## Future Improvements
+
+
+The language options for the source texts, translations, and termbases, as well as the project and task statuses, are all hardcoded in the Django data models. These will need to be extended or made available to edit on the frontend in the future. 
 
 
