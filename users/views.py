@@ -29,7 +29,7 @@ class SignUpView(APIView):
 
 
 class UserUpdateView(APIView):
-    permission_classes = [IsAuthenticated]  # only logged-in users can update
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, user_id):
         try:

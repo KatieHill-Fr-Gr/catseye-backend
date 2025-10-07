@@ -35,3 +35,5 @@ class TaskDetailView(RetrieveUpdateDestroyAPIView):
         get_object_or_404(Project, pk=project_pk) 
         return Task.objects.filter(parent_project_id=project_pk)
     
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
