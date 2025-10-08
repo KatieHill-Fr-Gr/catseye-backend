@@ -1,7 +1,7 @@
 # Catseye - A CAT tool & project management app in one
 by Katie Hill 
 
-<img width="1440" height="806" alt="Catseye_LiveHomepage" src="https://github.com/user-attachments/assets/c947b071-46da-4cd8-8971-3c5547b9cf90" />
+<img width="1449" height="923" alt="Catseye_homepage" src="https://github.com/user-attachments/assets/d81b85f0-fda7-45d7-b45c-3d3f218ec65e" />
 
 *Screenshot of homepage*
 
@@ -127,6 +127,7 @@ Given the multiple relationships between models, it was important to manage how 
 
 <img width="1043" height="192" alt="Catseye_NestedSerializers" src="https://github.com/user-attachments/assets/56b4b1a9-110f-4e0e-bd09-1a5b14541538" />
 
+I also used select_related to combine queries into a single more complex query to boost performance when accessing related data in the database. 
 
 
 #### 4) Nested Routes
@@ -169,6 +170,10 @@ Whenever a task is moved to a different column on the board (e.g. from “Review
 
 ## Wins
 
+- Designed & implemented a clear URL structure with nested routes
+- Developed reusable generic views and serializers to avoid duplicating code
+- Used nested serializers to limit frontend API calls and the `select_related` method to optimise database queries
+- Successfully implemented JWT authentication and strict access control with permission classes
 
 
 ## Key Learnings
@@ -185,7 +190,27 @@ There are currently no bugs and the API is working as expected.
 
 ## Future Improvements
 
+1) Role-Based Permissions
 
-The language options for the source texts, translations, and termbases, as well as the project and task statuses, are all hardcoded in the Django data models. These will need to be extended or made available to edit on the frontend in the future. 
+Users are currently only able to access projects associated with their team. However, there is no restriction on who can create, edit and delete the team’s projects or any of the resources. More granular permissions may be more appropriate so that project owners and contributors have different access levels. 
+
+2) Search & Filtering
+
+Advanced filtering and search options would allow users to access resources more quickly (e.g. search for a specific task, text or translation). 
+
+
+3) Multi-Tenancy Support
+
+To allow different organisations to use the app, individual environments would need to be set up with separate schemas and databases (and a `tenant_id` on each model). 
+
+
+4) Language Options
+
+The language options for the source texts, translations, and termbases, as well as the project and task statuses, are all hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility.  
+
+
+5) Text Analysis
+
+The Lexical text editor has a wordcount (which is useful for marketing texts that have a character limit such as email subject lines, sponsored articles, and Facebook Ads, etc.). However, it would also be good to include additional text analysis features to allow users to evaluate translation quality and manage terminology.
 
 
