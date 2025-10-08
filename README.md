@@ -170,6 +170,10 @@ Whenever a task is moved to a different column on the board (e.g. from “Review
 
 ## Wins
 
+- Designed & implemented a clear URL structure with nested routes
+- Developed reusable generic views and serializers to avoid duplicating code
+- Used nested serializers to limit frontend API calls and the `select_related` method to optimise database queries
+- Successfully implemented JWT authentication and strict access control with permission classes
 
 
 ## Key Learnings
