@@ -190,26 +190,32 @@ There are currently no bugs and the API is working as expected.
 
 ## Future Improvements
 
-1) Role-Based Permissions
+#### 1) AI Integration
+
+I’m currently integrating the DeepL translation API to enable automated translation within the app. I looked into potential proxy options (e.g. using Netlify functions) but decided to use my Django REST API to handle translation requests for simplicity.
+
+A new translation endpoint `/api/translation` and corresponding DRF Serializer and View will be implemented to allow users to submit texts for translation.The backend then sends the request to the third-party API and returns the output to the frontend. 
+
+#### 2) Role-Based Permissions
 
 Users are currently only able to access projects associated with their team. However, there is no restriction on who can create, edit and delete the team’s projects or any of the resources. More granular permissions may be more appropriate so that project owners and contributors have different access levels. 
 
-2) Search & Filtering
+#### 3) Search & Filtering
 
 Advanced filtering and search options would allow users to access resources more quickly (e.g. search for a specific task, text or translation). 
 
 
-3) Multi-Tenancy Support
+#### 4) Multi-Tenancy Support
 
 To allow different organisations to use the app, individual environments would need to be set up with separate schemas and databases (and a `tenant_id` on each model). 
 
 
-4) Language Options
+#### 5)  Supported Languages
 
 The language options for the source texts, translations, and termbases, as well as the project and task statuses, are all hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility.  
 
 
-5) Text Analysis
+#### 6) Text Analysis
 
 The Lexical text editor has a wordcount (which is useful for marketing texts that have a character limit such as email subject lines, sponsored articles, and Facebook Ads, etc.). However, it would also be good to include additional text analysis features to allow users to evaluate translation quality and manage terminology.
 
