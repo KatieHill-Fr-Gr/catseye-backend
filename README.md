@@ -212,7 +212,7 @@ To allow different organisations to use the app, individual environments would n
 
 #### 5)  Supported Languages
 
-The language options for the source texts, translations, and termbases, as well as the project and task statuses, are all hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility.  
+The language options for the source texts and translations are hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility. 
 
 
 #### 6) Text Analysis
