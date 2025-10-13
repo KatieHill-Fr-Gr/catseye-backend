@@ -196,26 +196,30 @@ I’m currently integrating the DeepL translation API to enable automated transl
 
 A new translation endpoint `/api/translation` and corresponding DRF Serializer and View will be implemented to allow users to submit texts for translation.The backend then sends the request to the third-party API and returns the output to the frontend. 
 
-#### 2) Role-Based Permissions
+#### 2) Custom Error-Handling
+
+When login fails, the generic error from `rest_framework_simplejwt` is currently displayed in the UI. Custom-error handling should be implemented on the backend with an additional `CustomTokenObtainSerializer` and a `LoginView(APIView)` to provide more information for the user. 
+
+#### 3) Role-Based Permissions
 
 Users are currently only able to access projects associated with their team. However, there is no restriction on who can create, edit and delete the team’s projects or any of the resources. More granular permissions may be more appropriate so that project owners and contributors have different access levels. 
 
-#### 3) Search & Filtering
+#### 4) Search & Filtering
 
 Advanced filtering and search options would allow users to access resources more quickly (e.g. search for a specific task, text or translation). 
 
 
-#### 4) Multi-Tenancy Support
+#### 5) Multi-Tenancy Support
 
 To allow different organisations to use the app, individual environments would need to be set up with separate schemas and databases (and a `tenant_id` on each model). 
 
 
-#### 5)  Supported Languages
+#### 6)  Supported Languages
 
-The language options for the source texts and translations are hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility. 
+The language options for the source texts and translations are hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility.  
 
 
-#### 6) Text Analysis
+#### 7) Text Analysis
 
 The Lexical text editor has a wordcount (which is useful for marketing texts that have a character limit such as email subject lines, sponsored articles, and Facebook Ads, etc.). However, it would also be good to include additional text analysis features to allow users to evaluate translation quality and manage terminology.
 
