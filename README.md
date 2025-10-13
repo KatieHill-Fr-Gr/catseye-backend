@@ -185,7 +185,9 @@ Whenever a task is moved to a different column on the board (e.g. from “Review
 
 ## Bugs
 
-There are currently no bugs and the API is working as expected. 
+##### Sign up
+
+The TokenSerializer includes the full user object which causes issues on the frontend when the new user payload exceeds the size limit for JWTs. A solution is currently being implemented to store only the user ID in the JWT and create a new endpoint (`CurrentUserView`). 
 
 
 ## Future Improvements
