@@ -92,13 +92,38 @@ This project required multiple interconnected datasets so I started by planning 
 I implemented JWT authentication, manually extending the Access Token Lifetime in the project settings. I then created custom AuthSerializer and TokenSerializer classes to manage user authentication: 
 
 
-<img width="635" height="375" alt="Catseye_TokenSerializer" src="https://github.com/user-attachments/assets/42839312-e03c-41fc-a537-da7c2e7366ba" />
+```
+class TokenSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
 
+        token['user'] = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'profile_img': user.profile_img,
+            'job_title': user.job_title,
+            'team': {
+                'id': user.team.id if user.team else None,
+                'name': user.team.name if user.team else None,
+            }
+        }
+        return token
+```
 
 Since the app is intended for business use, most of the routes require authentication. I applied Permission Classes to control access across the app, allowing unrestricted access to the homepage and signup routes only:
 
-<img width="630" height="202" alt="Catseye_RESTFrameworkAuth" src="https://github.com/user-attachments/assets/0fe359e5-ee1a-4742-b6c9-c069d0b08971" />
-
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+```
 
 #### 2) Data Models & Views
 
@@ -112,20 +137,61 @@ I created separate Django apps for each data entity and defined the models, incl
 - translations
 - termbases
 
-<img width="1042" height="476" alt="Catseye_TaskModel" src="https://github.com/user-attachments/assets/246d5da4-1eb5-4b77-a71b-a1e112a65abb" />
+```
+class Task(models.Model):
 
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('review', 'Under Review'),
+        ('completed', 'Completed'),
+        ('on_hold', 'On Hold'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(max_length=1000)
+    deadline = models.DateField()
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='in_progress')
+
+    parent_project = models.ForeignKey(to='projects.Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='project_tasks')
+    assigned_to = models.ForeignKey(to='users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
+    source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+    translation = models.ForeignKey(to='translations.Translation', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+```
 
 For the API layer, I used Django REST Framework’s generic views wherever possible to speed up development and keep the codebase clean:
 
 
-<img width="1040" height="337" alt="Catseye_GenericViews" src="https://github.com/user-attachments/assets/1d84a795-faae-45d0-8fce-b7a6dc0e4642" />
+```
+class ProjectListView(ListCreateAPIView):
+    queryset = Project.objects.select_related('team', 'owner').all()
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer
+        return ProjectSerializer 
+
+class ProjectDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.select_related('team', 'owner').all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer 
+        return ProjectSerializer
+```
 
 #### 3) Serializers
 
 Given the multiple relationships between models, it was important to manage how the data was exposed through the API to avoid multiple API calls on the frontend. I designed nested and populated serializers for the projects and tasks (associated with teams, users, source texts, and translations):  
 
-<img width="1043" height="192" alt="Catseye_NestedSerializers" src="https://github.com/user-attachments/assets/56b4b1a9-110f-4e0e-bd09-1a5b14541538" />
+```
+class PopulatedProjectSerializer(ProjectSerializer):
+    owner = OwnerSerializer()
+    team = TeamSerializer()
+
+    class Meta(ProjectSerializer.Meta):
+        fields = ['id', 'name', 'brief', 'deadline', 'images', 'status', 'owner', 'team']
+```
 
 I also used select_related to combine queries into a single more complex query to boost performance when accessing related data in the database. 
 
