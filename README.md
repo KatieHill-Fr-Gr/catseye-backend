@@ -200,8 +200,17 @@ I also used select_related to combine queries into a single more complex query t
 
 Instead of creating standalone endpoints for the tasks, I structured them under the project routes since the tasks can only belong to one project: 
 
-<img width="1044" height="226" alt="Catseye_NestedRoutes" src="https://github.com/user-attachments/assets/a3a1e97f-042a-4f5f-b99b-4b1b5ebbc2c1" />
-
+```
+urlpatterns = [
+    path('', ProjectListView.as_view()),
+    path('<int:pk>/', ProjectDetailView.as_view()),
+    path('<int:pk>/tasks/', TaskListView.as_view()),
+    path('<int:pk>/tasks/<int:task_pk>/', TaskDetailView.as_view()),
+    path('<int:pk>/team-users/', ProjectTeamUsersView.as_view()),
+    path('user-team-projects/', UserTeamProjectsView.as_view()),
+    path('user-tasks/', UserTasksView.as_view()), 
+]
+```
 
 I decided to keep the sources texts, translations, and termbases separate so that these could be accessed by multiple projects and tasks. Overall, this approach helped to make it clear how resources are accessed and kept the API design clean and intuitive. 
 
@@ -215,15 +224,43 @@ When generating a new Token, the custom serializer settings were ignored and a s
 
 The solution was to manually generate the Token with `TokenSerializer.get_token(serialized_user.instance)`:
 
-<img width="629" height="305" alt="Catseye_RefreshTokenFix" src="https://github.com/user-attachments/assets/ed3769a7-88fd-4edc-9052-1bee9c877141" />
+```
+class SignUpView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
+        serialized_user = AuthSerializer(data=request.data)
+        serialized_user.is_valid(raise_exception=True)
+        serialized_user.save()
+        print(serialized_user.data)
+
+        refresh = TokenSerializer.get_token(serialized_user.instance)
+
+        return Response({
+             'access': str(refresh.access_token)
+            }, 201)
+```
 
 #### 2) User Profile Update
 
 The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and the name): 
 
-<img width="1038" height="316" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/c2a682e4-5f75-4ba2-bda3-7d13f610244a" />
+```
+class OwnerSerializer(serializers.ModelSerializer):
+    team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), required=False, allow_null=True)
+    team_info = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'job_title', 'profile_img', 'team', 'team_info']
 
+    def get_team_info(self, obj):
+        if obj.team:
+            return {
+                'id': obj.team.id,
+                'name': obj.team.name
+            }
+        return None
+```
 
 #### 3) Task Statuses
 
@@ -231,8 +268,24 @@ To update the task statuses via the drag-and-drop functionality of the Kanban bo
 
 Whenever a task is moved to a different column on the board (e.g. from “Review” to “Done”), its status is persisted in the database and remains consistent with the frontend state. 
 
-<img width="1042" height="354" alt="Catseye_TaskDetailView" src="https://github.com/user-attachments/assets/7bb5fd50-730a-49a3-854b-e080aa22db23" />
+```
+class TaskDetailView(RetrieveUpdateDestroyAPIView):
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedTaskSerializer
+        return TaskSerializer 
 
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'task_pk'
+
+    def get_queryset(self):
+        project_pk = self.kwargs['pk']
+        get_object_or_404(Project, pk=project_pk) 
+        return Task.objects.filter(parent_project_id=project_pk)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+```
 
 ## Wins
 
