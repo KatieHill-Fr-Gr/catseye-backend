@@ -1,5 +1,6 @@
 import deepl
 import os
+from django.conf import settings
 
 _client = None 
 '''
@@ -10,7 +11,11 @@ it's called a "lazy-singleton" pattern, i.e. the stored client is reused for all
 def get_deepl_client():
     global _client
     if _client is None:
-        key = os.environ['DEEPL_AUTH_KEY']
+        key = settings.DEEPL_AUTH_KEY
+        if not key: 
+            raise RuntimeError('DEEPL_AUTH_KEY missing in settings')
+        _client = deepl.DeepLClient(key)
+    return _client
 
 
 def translate_text(text: str, target_lang: str):
