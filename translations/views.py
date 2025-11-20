@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import Translation
 from .serializers.common import TranslationSerializer
 from rest_framework.exceptions import NotFound, PermissionDenied
+from .services.deepl_service import translate_text
 
 
 # * Path: /translations
@@ -56,3 +57,19 @@ class TranslationDetailView(APIView):
 
         translation.delete()
         return Response(status=204)
+    
+# * Path: translations/auto-translate/
+
+class AutoTranslateView(APIView):
+    def post(self, request):
+        source_text = request.data.get('text')
+        target_lang = request.data.get('target_lang')
+
+        if not source_text or not target_lang:
+            return Response(
+                {'error': 'Missing text or target-lang'},
+                 status=400
+            )
+
+        translated = translate_text(source_text, target_lang)
+        return Response({'translated_text': translated})
