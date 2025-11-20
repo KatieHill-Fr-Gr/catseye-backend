@@ -92,13 +92,38 @@ This project required multiple interconnected datasets so I started by planning 
 I implemented JWT authentication, manually extending the Access Token Lifetime in the project settings. I then created custom AuthSerializer and TokenSerializer classes to manage user authentication: 
 
 
-<img width="635" height="375" alt="Catseye_TokenSerializer" src="https://github.com/user-attachments/assets/42839312-e03c-41fc-a537-da7c2e7366ba" />
+```
+class TokenSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
 
+        token['user'] = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'profile_img': user.profile_img,
+            'job_title': user.job_title,
+            'team': {
+                'id': user.team.id if user.team else None,
+                'name': user.team.name if user.team else None,
+            }
+        }
+        return token
+```
 
 Since the app is intended for business use, most of the routes require authentication. I applied Permission Classes to control access across the app, allowing unrestricted access to the homepage and signup routes only:
 
-<img width="630" height="202" alt="Catseye_RESTFrameworkAuth" src="https://github.com/user-attachments/assets/0fe359e5-ee1a-4742-b6c9-c069d0b08971" />
-
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+```
 
 #### 2) Data Models & Views
 
@@ -112,20 +137,61 @@ I created separate Django apps for each data entity and defined the models, incl
 - translations
 - termbases
 
-<img width="1042" height="476" alt="Catseye_TaskModel" src="https://github.com/user-attachments/assets/246d5da4-1eb5-4b77-a71b-a1e112a65abb" />
+```
+class Task(models.Model):
 
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('review', 'Under Review'),
+        ('completed', 'Completed'),
+        ('on_hold', 'On Hold'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(max_length=1000)
+    deadline = models.DateField()
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='in_progress')
+
+    parent_project = models.ForeignKey(to='projects.Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='project_tasks')
+    assigned_to = models.ForeignKey(to='users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
+    source_text = models.ForeignKey(to='source_texts.Source', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+    translation = models.ForeignKey(to='translations.Translation', on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+```
 
 For the API layer, I used Django REST Framework’s generic views wherever possible to speed up development and keep the codebase clean:
 
 
-<img width="1040" height="337" alt="Catseye_GenericViews" src="https://github.com/user-attachments/assets/1d84a795-faae-45d0-8fce-b7a6dc0e4642" />
+```
+class ProjectListView(ListCreateAPIView):
+    queryset = Project.objects.select_related('team', 'owner').all()
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer
+        return ProjectSerializer 
+
+class ProjectDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.select_related('team', 'owner').all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedProjectSerializer 
+        return ProjectSerializer
+```
 
 #### 3) Serializers
 
 Given the multiple relationships between models, it was important to manage how the data was exposed through the API to avoid multiple API calls on the frontend. I designed nested and populated serializers for the projects and tasks (associated with teams, users, source texts, and translations):  
 
-<img width="1043" height="192" alt="Catseye_NestedSerializers" src="https://github.com/user-attachments/assets/56b4b1a9-110f-4e0e-bd09-1a5b14541538" />
+```
+class PopulatedProjectSerializer(ProjectSerializer):
+    owner = OwnerSerializer()
+    team = TeamSerializer()
+
+    class Meta(ProjectSerializer.Meta):
+        fields = ['id', 'name', 'brief', 'deadline', 'images', 'status', 'owner', 'team']
+```
 
 I also used select_related to combine queries into a single more complex query to boost performance when accessing related data in the database. 
 
@@ -134,8 +200,17 @@ I also used select_related to combine queries into a single more complex query t
 
 Instead of creating standalone endpoints for the tasks, I structured them under the project routes since the tasks can only belong to one project: 
 
-<img width="1044" height="226" alt="Catseye_NestedRoutes" src="https://github.com/user-attachments/assets/a3a1e97f-042a-4f5f-b99b-4b1b5ebbc2c1" />
-
+```
+urlpatterns = [
+    path('', ProjectListView.as_view()),
+    path('<int:pk>/', ProjectDetailView.as_view()),
+    path('<int:pk>/tasks/', TaskListView.as_view()),
+    path('<int:pk>/tasks/<int:task_pk>/', TaskDetailView.as_view()),
+    path('<int:pk>/team-users/', ProjectTeamUsersView.as_view()),
+    path('user-team-projects/', UserTeamProjectsView.as_view()),
+    path('user-tasks/', UserTasksView.as_view()), 
+]
+```
 
 I decided to keep the sources texts, translations, and termbases separate so that these could be accessed by multiple projects and tasks. Overall, this approach helped to make it clear how resources are accessed and kept the API design clean and intuitive. 
 
@@ -149,15 +224,43 @@ When generating a new Token, the custom serializer settings were ignored and a s
 
 The solution was to manually generate the Token with `TokenSerializer.get_token(serialized_user.instance)`:
 
-<img width="629" height="305" alt="Catseye_RefreshTokenFix" src="https://github.com/user-attachments/assets/ed3769a7-88fd-4edc-9052-1bee9c877141" />
+```
+class SignUpView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
+        serialized_user = AuthSerializer(data=request.data)
+        serialized_user.is_valid(raise_exception=True)
+        serialized_user.save()
+        print(serialized_user.data)
+
+        refresh = TokenSerializer.get_token(serialized_user.instance)
+
+        return Response({
+             'access': str(refresh.access_token)
+            }, 201)
+```
 
 #### 2) User Profile Update
 
 The user’s team was not returned correctly in the update profile response so I changed the OwnerSerializer and TokenSerializer to include the full team object (including the id and the name): 
 
-<img width="1038" height="316" alt="Catseye_UserTeamSerializerFix" src="https://github.com/user-attachments/assets/c2a682e4-5f75-4ba2-bda3-7d13f610244a" />
+```
+class OwnerSerializer(serializers.ModelSerializer):
+    team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), required=False, allow_null=True)
+    team_info = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'job_title', 'profile_img', 'team', 'team_info']
 
+    def get_team_info(self, obj):
+        if obj.team:
+            return {
+                'id': obj.team.id,
+                'name': obj.team.name
+            }
+        return None
+```
 
 #### 3) Task Statuses
 
@@ -165,8 +268,24 @@ To update the task statuses via the drag-and-drop functionality of the Kanban bo
 
 Whenever a task is moved to a different column on the board (e.g. from “Review” to “Done”), its status is persisted in the database and remains consistent with the frontend state. 
 
-<img width="1042" height="354" alt="Catseye_TaskDetailView" src="https://github.com/user-attachments/assets/7bb5fd50-730a-49a3-854b-e080aa22db23" />
+```
+class TaskDetailView(RetrieveUpdateDestroyAPIView):
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PopulatedTaskSerializer
+        return TaskSerializer 
 
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'task_pk'
+
+    def get_queryset(self):
+        project_pk = self.kwargs['pk']
+        get_object_or_404(Project, pk=project_pk) 
+        return Task.objects.filter(parent_project_id=project_pk)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+```
 
 ## Wins
 
@@ -185,7 +304,9 @@ Whenever a task is moved to a different column on the board (e.g. from “Review
 
 ## Bugs
 
-There are currently no bugs and the API is working as expected. 
+##### Sign up
+
+The TokenSerializer includes the full user object which causes issues on the frontend when the new user payload exceeds the size limit for JWTs. A solution is currently being implemented to store only the user ID in the JWT and create a new endpoint (`CurrentUserView`). 
 
 
 ## Future Improvements
@@ -196,26 +317,30 @@ I’m currently integrating the DeepL translation API to enable automated transl
 
 A new translation endpoint `/api/translation` and corresponding DRF Serializer and View will be implemented to allow users to submit texts for translation.The backend then sends the request to the third-party API and returns the output to the frontend. 
 
-#### 2) Role-Based Permissions
+#### 2) Custom Error-Handling
+
+When login fails, the generic error from `rest_framework_simplejwt` is currently displayed in the UI. Custom-error handling should be implemented on the backend with an additional `CustomTokenObtainSerializer` and a `LoginView(APIView)` to provide more information for the user. 
+
+#### 3) Role-Based Permissions
 
 Users are currently only able to access projects associated with their team. However, there is no restriction on who can create, edit and delete the team’s projects or any of the resources. More granular permissions may be more appropriate so that project owners and contributors have different access levels. 
 
-#### 3) Search & Filtering
+#### 4) Search & Filtering
 
 Advanced filtering and search options would allow users to access resources more quickly (e.g. search for a specific task, text or translation). 
 
 
-#### 4) Multi-Tenancy Support
+#### 5) Multi-Tenancy Support
 
 To allow different organisations to use the app, individual environments would need to be set up with separate schemas and databases (and a `tenant_id` on each model). 
 
 
-#### 5)  Supported Languages
+#### 6)  Supported Languages
 
-The language options for the source texts and translations are hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility. 
+The language options for the source texts and translations are hardcoded in the Django data models. These could be extended or made available to edit on the frontend to allow more flexibility.  
 
 
-#### 6) Text Analysis
+#### 7) Text Analysis
 
 The Lexical text editor has a wordcount (which is useful for marketing texts that have a character limit such as email subject lines, sponsored articles, and Facebook Ads, etc.). However, it would also be good to include additional text analysis features to allow users to evaluate translation quality and manage terminology.
 
