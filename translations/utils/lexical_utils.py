@@ -7,6 +7,9 @@ def extract_text_nodes(node: Dict[str, Any], texts: List[Dict]) -> None:
     Recursively extract text nodes from Lexical JSON structure.
     Stores reference to the text node so we can update it later.
     """
+    # the arrow is a return value annotation so you can document your code inline,
+    # it shows the type that is expected to be returned
+    # they're equivalent to docstrings)
     if node.get('type') == 'text' and 'text' in node:
         texts.append(node)
     
@@ -34,6 +37,7 @@ def translate_lexical_json(lexical_data: dict, target_lang: str) -> dict:
     
     # Collect all text content
     texts_to_translate = [node['text'] for node in text_nodes if node['text'].strip()]
+    # strip() removes leading and trailing spaces and the if condition keeps only the nodes where stripped text contains something
     
     if not texts_to_translate:
         return data
@@ -45,6 +49,7 @@ def translate_lexical_json(lexical_data: dict, target_lang: str) -> dict:
     # Handle single vs multiple results
     if not isinstance(results, list):
         results = [results]
+    # Makes sure results is always a list (the isinstance checks if it's already a list, if it isn't, it gets wrapped in one)
     
     # Update the text nodes with translations
     result_idx = 0
