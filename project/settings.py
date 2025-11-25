@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 
 import environ
+
 # Initialise environment variables
 env = environ.Env()
 environ.Env.read_env()
@@ -22,6 +23,7 @@ environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DEEPL_AUTH_KEY = env("DEEPL_AUTH_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

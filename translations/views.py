@@ -1,9 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Translation
+from source_texts.models import Source
 from .serializers.common import TranslationSerializer
 from rest_framework.exceptions import NotFound, PermissionDenied
-
+from .services.deepl_service import translate_text
+from .utils.lexical_utils import extract_text_nodes, translate_lexical_json
+from django.shortcuts import get_object_or_404
+import json
 
 # * Path: /translations
 
@@ -56,3 +60,32 @@ class TranslationDetailView(APIView):
 
         translation.delete()
         return Response(status=204)
+    
+# * Path: translations/auto-translate/
+
+class AutoTranslateView(APIView):
+    def post(self, request):
+        source_id = request.data.get('source_id')
+        target_lang = request.data.get('target_lang')
+
+        if not source_id or not target_lang:
+            return Response(
+                {'error': 'Missing text or target-lang'},
+                 status=400
+            )
+        
+        source_obj = get_object_or_404(Source, id=source_id)
+
+        try: 
+            translated_json = translate_lexical_json(source_obj.body, target_lang)
+            
+            return Response({
+                'translated_text': translated_json,
+                'original': source_obj.body
+            })
+        except json.JSONDecodeError:
+            return Response(
+                {'error': 'Invalid JSON format'},
+                status=400
+            )
+
