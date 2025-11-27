@@ -315,8 +315,35 @@ The TokenSerializer includes the full user object which causes issues on the fro
 
 I’m currently integrating the DeepL translation API to enable automated translation within the app. I looked into potential proxy options (e.g. using Netlify functions) but decided to use my Django REST API to handle translation requests for simplicity.
 
-A new translation endpoint `/api/translation` and corresponding DRF Serializer and View will be implemented to allow users to submit texts for translation.The backend then sends the request to the third-party API and returns the output to the frontend. 
+To do this, I added helper functions to connect to the DeepL client and store it in a variable (the "lazy-singleton" pattern to avoid making multiple calls to the API). A new translations endpoint `/auto-translate` and corresponding View have also been implemented to allow users to submit texts for translation. The source texts are converted from JSON objects to strings so that they can be processed by the translation API. The response is then returned as JSON again — preserving the original format for reinjection into the Lexcial editor on the frontend:
 
+```
+class AutoTranslateView(APIView):
+    def post(self, request):
+        source_id = request.data.get('source_id')
+        target_lang = request.data.get('target_lang')
+
+        if not source_id or not target_lang:
+            return Response(
+                {'error': 'Missing text or target-lang'},
+                 status=400
+            )
+        
+        source_obj = get_object_or_404(Source, id=source_id)
+
+        try: 
+            translated_json = translate_lexical_json(source_obj.body, target_lang)
+            
+            return Response({
+                'translated_text': translated_json,
+                'original': source_obj.body
+            })
+        except json.JSONDecodeError:
+            return Response(
+                {'error': 'Invalid JSON format'},
+                status=400
+            )
+```
 #### 2) Custom Error-Handling
 
 When login fails, the generic error from `rest_framework_simplejwt` is currently displayed in the UI. Custom-error handling should be implemented on the backend with an additional `CustomTokenObtainSerializer` and a `LoginView(APIView)` to provide more information for the user. 
