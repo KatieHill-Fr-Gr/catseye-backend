@@ -315,7 +315,7 @@ The TokenSerializer includes the full user object which causes issues on the fro
 
 I’m currently integrating the DeepL translation API to enable automated translation within the app. I looked into potential proxy options (e.g. using Netlify functions) but decided to use my Django REST API to handle translation requests for simplicity.
 
-To do this, I added helper functions to connect to the DeepL client and store it in a variable (the "lazy-singleton" pattern to avoid making multiple calls to the API). A new translations endpoint `/auto-translate` and corresponding View have also been implemented to allow users to submit texts for translation. The source texts are converted from JSON objects to strings so that they can be processed by the translation API. The response is then returned as JSON again — preserving the original format for reinjection into the Lexcial editor on the frontend:
+To do this, I added helper functions to connect to the DeepL client and store it in a variable (the "lazy-singleton" pattern to avoid making multiple calls to the API). A new translations endpoint `/auto-translate` and corresponding View have also been implemented to allow users to submit texts for translation. The source texts are converted from JSON objects to strings so that they can be processed by the translation API. The response is then returned as JSON again — preserving the original format for reinjection into the Lexical editor on the frontend:
 
 ```
 class AutoTranslateView(APIView):
