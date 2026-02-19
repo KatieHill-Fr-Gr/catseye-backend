@@ -10,7 +10,7 @@ class Translation(models.Model):
         ('fr-FR', 'French'),
         ('es-ES', 'Spanish'),
         ('it-IT', 'Italian'),
-        ('gr-GR', 'Greek'),
+        ('el-EL', 'Greek'),
         ('de-DE', 'German'),
         ('nl-NL', 'Dutch'),
         ('pl-PL', 'Polish'),

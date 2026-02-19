@@ -63,6 +63,18 @@ class TranslationDetailView(APIView):
     
 # * Path: translations/auto-translate/
 
+DEEPL_LANG_MAP = {
+    'en-GB': 'EN-GB',
+    'en-US': 'EN-US',
+    'fr-FR': 'FR',
+    'es-ES': 'ES',
+    'it-IT': 'IT',
+    'de-DE': 'DE',
+    'nl-NL': 'NL',
+    'pl-PL': 'PL',
+    'el-EL': 'EL',
+}
+
 class AutoTranslateView(APIView):
     def post(self, request):
         source_id = request.data.get('source_id')
@@ -73,6 +85,10 @@ class AutoTranslateView(APIView):
                 {'error': 'Missing text or target-lang'},
                  status=400
             )
+        
+        target_lang = DEEPL_LANG_MAP.get(target_lang)
+        if not target_lang:
+            return Response({'error': 'Unsupported language'}, status=400)
         
         source_obj = get_object_or_404(Source, id=source_id)
 
