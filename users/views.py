@@ -24,6 +24,7 @@ class SignUpView(APIView):
         refresh = TokenSerializer.get_token(serialized_user.instance)
 
         return Response({
+             'refresh': str(refresh),
              'access': str(refresh.access_token)
             }, 201)
 
