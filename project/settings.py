@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'source_texts',
     'translations',
     'termbases',
+    'text_analysis',
     'corsheaders',
 ]
 
